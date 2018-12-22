@@ -1,0 +1,6 @@
+*.ibc
+*.idr
+.git
+*.lidr~
+*.idr~
+logic

@@ -1,0 +1,15 @@
+package temporal
+
+pkgs = contrib
+
+sourcedir = src
+
+opts = "--partial-eval"
+
+modules = Temporal
+        , Temporal.Automation
+        , Temporal.Combinators
+        , Temporal.Core
+        , Temporal.Event
+        , Temporal.Reader
+        , Temporal.Time
