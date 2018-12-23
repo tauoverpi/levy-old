@@ -14,6 +14,9 @@ License  : GNU AGPL, version 3 or later;http://www.gnu.org/licenses/agpl.html
 >  = NotNow
 >  | Now a
 
+> Interval : (r, t, a, b : Type) -> Type
+> Interval r t a b = SF r t a (Event b)
+
 > Functor Event where
 >   map f NotNow = NotNow
 >   map f (Now a) = Now (f a)
@@ -36,7 +39,7 @@ License  : GNU AGPL, version 3 or later;http://www.gnu.org/licenses/agpl.html
  _ >--------------- (_ -> _) ---------------> Event _
 
 > ||| Inhibit forever
-> neverE : SF r t a (Event b)
+> neverE : Interval r t a b
 > neverE = SFConst NotNow
 
                             B
@@ -48,41 +51,16 @@ License  : GNU AGPL, version 3 or later;http://www.gnu.org/licenses/agpl.html
 > ||| ```idris example
 > ||| exampleSF (nowE 0) 0 0 0
 > ||| ```
-> nowE : b -> SF r t a (Event b)
+> nowE : b -> Interval r t a b
 > nowE b = SFGen $ \_, _, _ => (neverE, Now b)
 
  A >------------------------,---------------> Event A
                 next frame  '---------------> Event _
 
-> onceE : SF r t a (Event b) -> SF r t a (Event b)
+> onceE : Interval r t a b -> Interval r t a b
 > onceE a = SFGen $ \r, t, x => case stepSF a r t x of
 >   (n, NotNow) => (onceE n, NotNow)
 >   (_, Now x) => (neverE, Now x)
-
- A >------------------------,---------------> B
-                  notnow     \
- A >--------------------------'-------------> B
-
-> becomeA : SF r t a (Event b) -> SF r t a b -> SF r t a b
-> becomeA a b = SFGen $ \r, t, x => case stepSF a r t x of
->   (_, NotNow) => stepSF b r t x
->   (a, Now x)  => (becomeA a b, x)
-
-> infixr 7 ->>
-> (->>) : SF r t a (Event b) -> SF r t a b -> SF r t a b
-> (->>) = becomeA
-
- A >------------------------,---------------> Event B
-                  notnow     \
- A >--------------------------'-------------> Event B
-
-> becomeE : SF r t a (Event b) -> SF r t a (Event b) -> SF r t a (Event b)
-> becomeE a b = SFGen $ \r, t, x => case stepSF a r t x of
->   (_, NotNow) => stepSF b r t x
->   (a, Now x)  => (becomeE a b, Now x)
-
-> (>>) : SF r t a (Event b) -> SF r t a (Event b) -> SF r t a (Event b)
-> (>>) = becomeE
 
  A >-----------------------,----------------> A
                       now   \
@@ -102,43 +80,6 @@ License  : GNU AGPL, version 3 or later;http://www.gnu.org/licenses/agpl.html
 
 > holdNextA : b -> SF r t (Event b) b
 > holdNextA b = delayA b (holdA b)
-
- A >------------------,---------------------> B
-            (b, now)   \
-                        '-------------------> B
-
-
-> switchA : SF r t a (b, Event $ SF r t a b) -> SF r t a b
-> switchA sf = SFGen $ \r, t, x => case stepSF sf r t x of
->   (sf, b, NotNow) => (switchA sf, b)
->   (_, b, Now sf) => stepSF sf r t x
-
-                            now
- A >------------,---------------,-----------> B
-         notnow  \             /
- A >--------------'-----------'-------------> B
-
-> altA : SF r t a (Event b) -> SF r t a b -> SF r t a b
-> altA a b = SFGen $ \r, t, x => case stepSF a r t x of
->   (n, NotNow) => let (m, x) = stepSF b r t x in (altA n m, x)
->   (n, Now x)  => (altA n b, x)
-
-> infixr 2 </>
-> (</>) : SF r t a (Event b) -> SF r t a b -> SF r t a b
-> (</>) = altA
-
-                            now
- A >------------,---------------,-----------> Event B
-         notnow  \             /
- A >--------------'-----------'-------------> Event B
-
-> altE : SF r t a (Event b) -> SF r t a (Event b) -> SF r t a (Event b)
-> altE a b = SFGen $ \r, t, x => case stepSF a r t x of
->   (n, NotNow) => let (m, x) = stepSF b r t x in (altE n m, x)
->   (n, x)  => (altE n b, x)
-
-> (<|>) : SF r t a (Event b) -> SF r t a (Event b) -> SF r t a (Event b)
-> (<|>) = altE
 
  Event A >-- F E E D B A C K ---------------> B
 

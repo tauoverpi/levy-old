@@ -76,7 +76,6 @@ License  : GNU AGPL, version 3 or later;http://www.gnu.org/licenses/agpl.html
 
 >   (<*>) = SFAp
 
-
 > Semigroup b => Semigroup (SF r t a b) where
 
  A >--------------- (a -> a) ---------------> B
@@ -103,18 +102,31 @@ License  : GNU AGPL, version 3 or later;http://www.gnu.org/licenses/agpl.html
             \                      /
              '--------< c <---,---'
                              /
-                           C
+                            C
+
+TBD: Implement everything in terms of feedback
 
 > feedbackA : c -> SF r t (a, c) (b, c) -> SF r t a b
 > feedbackA = SFFeedback
 
- A >-- F E E D B A C K ---------------------> B
-
-            [ (+) : a -> b -> b ]
+ A >-------,-------- a + c --------,--------> B
+            \                     /
+             '-------< c <---,---'
+                            /
+                           C
 
 > accumA : (a -> b -> b) -> b -> SF r t a b
 > accumA (+) b = feedbackA b $ arrow sum
 >   where sum (a, c) = let r = a + c in (r, r)
+
+ A >-------,--------- fn c ---------,-------> B
+            \                      /
+             '--------< c <---,---'
+                             /
+                            C
+
+> iteratorA : (b -> b) -> b -> SF r t a b
+> iteratorA fn = accumA (const fn)
 
  A >------------ (a -> Bool) ---------------> Either A A
 

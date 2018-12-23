@@ -18,3 +18,7 @@ License  : GNU AGPL, version 3 or later;http://www.gnu.org/licenses/agpl.html
 > ||| Automation with the reader monad
 > AutoR : Type -> Type -> Type -> Type
 > AutoR r = SF r ()
+
+> streamAuto : Auto a b -> (a -> b -> a) -> b -> Stream a -> Stream b
+> streamAuto sf (+) b (a :: as) = let (sf, b) = stepSF sf () () (a + b) in
+>  b :: streamAuto sf (+) b as

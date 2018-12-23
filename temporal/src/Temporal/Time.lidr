@@ -20,12 +20,12 @@ License  : GNU AGPL, version 3 or later;http://www.gnu.org/licenses/agpl.html
 >         go o = SFGen $ \r, t, x =>
 >           if p o t then (go o, Now x) else (go o, NotNow)
 
-> at : (Eq t, Num t) => t -> SF r t a (Event a)
+> at : (Eq t, Num t) => t -> Interval r t a a
 > at n = timed $ \o, t => t == o + n
 
-> for : (Ord t, Num t) => t -> SF r t a (Event a)
+> for : (Ord t, Num t) => t -> Interval r t a a
 > for n = timed $ \o, t => t > o + n
 
-> after : (Ord t, Num t) => t -> SF r t a (Event a)
+> after : (Ord t, Num t) => t -> Interval r t a a
 > after n = timed $ \o, t => t < o + n
 

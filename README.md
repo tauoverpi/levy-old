@@ -15,5 +15,6 @@ Libraries
 - [ ] Logic       - SAT, SMT, and other solvers
 - [ ] Levy        - Levy specific modules
 
+
 Copyright: © 2018 Simon Nielsen Knights <tauoverpi@yandex.com>
 License  : GNU AGPL, version 3 or later;http://www.gnu.org/licenses/agpl.html
